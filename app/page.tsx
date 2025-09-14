@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useAuth } from "@/contexts/auth-context"
+import { useRouter } from "next/navigation"
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
 import { Dashboard } from "@/components/dashboard"
@@ -11,8 +13,28 @@ import { GridMap } from "@/components/grid-map"
 import { Settings } from "@/components/settings"
 
 export default function PowerGridMonitor() {
+  const { isAuthenticated, isLoading } = useAuth()
+  const router = useRouter()
   const [activeView, setActiveView] = useState("dashboard")
   const [selectedRegion, setSelectedRegion] = useState("all")
+
+  useEffect(() => {
+    if (!isAuthenticated && !isLoading) {
+      router.push('/login')
+    }
+  }, [isAuthenticated, isLoading, router])
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-background dark:bg-slate-950">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return null // Will redirect to login
+  }
 
   const renderContent = () => {
     switch (activeView) {

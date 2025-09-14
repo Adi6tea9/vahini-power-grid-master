@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useAuth } from "@/contexts/auth-context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,8 +19,8 @@ import {
 } from "lucide-react"
 
 export function LoginForm() {
+  const { login, isLoading } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -39,12 +40,20 @@ export function LoginForm() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
     setLoginStatus({ type: null, message: "" })
 
-    // Simulate API call
-    setTimeout(() => {
-      if (loginData.email && loginData.password) {
+    if (!loginData.email || !loginData.password) {
+      setLoginStatus({
+        type: 'error',
+        message: 'Please fill in all required fields.'
+      })
+      return
+    }
+
+    try {
+      const success = await login(loginData.email, loginData.password)
+      
+      if (success) {
         setLoginStatus({
           type: 'success',
           message: 'Login successful! Welcome to Power Grid Monitor.'
@@ -52,11 +61,15 @@ export function LoginForm() {
       } else {
         setLoginStatus({
           type: 'error',
-          message: 'Please fill in all required fields.'
+          message: 'Invalid email or password. Please try again.'
         })
       }
-      setIsLoading(false)
-    }, 1500)
+    } catch (error) {
+      setLoginStatus({
+        type: 'error',
+        message: 'An error occurred during login. Please try again.'
+      })
+    }
   }
 
   return (

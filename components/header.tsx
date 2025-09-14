@@ -1,11 +1,13 @@
 "use client"
 
-import { Search, Bell, Download, RefreshCw, Sun, Moon } from "lucide-react"
+import { Search, Bell, Download, RefreshCw, Sun, Moon, LogOut, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useTheme } from "next-themes"
+import { useAuth } from "@/contexts/auth-context"
 
 interface HeaderProps {
   selectedRegion: string
@@ -14,6 +16,7 @@ interface HeaderProps {
 
 export function Header({ selectedRegion, onRegionChange }: HeaderProps) {
   const { theme, setTheme } = useTheme()
+  const { user, logout } = useAuth()
 
   return (
     <header className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between">
@@ -78,16 +81,34 @@ export function Header({ selectedRegion, onRegionChange }: HeaderProps) {
           <span className="sr-only text-gray-900 dark:text-gray-100">Toggle theme</span>
         </Button>
 
-        <div className="flex items-center gap-2">
-          <Avatar className="w-8 h-8">
-            <AvatarImage src="/abstract-geometric-shapes.png" />
-            <AvatarFallback className="text-gray-900 bg-gray-200">JS</AvatarFallback>
-          </Avatar>
-          <div className="text-sm">
-            <div className="font-medium text-gray-900 dark:text-white">John Smith</div>
-            <div className="text-gray-500 dark:text-gray-400 text-xs">Grid Operator</div>
-          </div>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-2 h-auto p-2">
+              <Avatar className="w-8 h-8">
+                <AvatarFallback className="text-white bg-blue-600">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-sm text-left hidden md:block">
+                <div className="font-medium text-gray-900 dark:text-white">{user?.name || 'Admin User'}</div>
+                <div className="text-gray-500 dark:text-gray-400 text-xs capitalize">{user?.role || 'Administrator'}</div>
+              </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={logout} className="text-red-600 dark:text-red-400">
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sign out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   )
